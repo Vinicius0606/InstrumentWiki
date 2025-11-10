@@ -1,0 +1,54 @@
+.header{
+    width: 100%;
+    background-color: black;
+    border: 1px rgb(52, 52, 52) solid;
+    border-radius: 10px;
+    box-shadow: 7px 5px 15px rgb(28, 28, 28);
+    padding: 10px 20px 10px 10px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    text-align: center;
+    align-items: center;
+}
+
+.headerLogo{
+    display: flex;
+    flex-direction: row;
+    text-align: center;
+    align-items: center;
+    font-size: clamp(1rem, 1.5dvw, 2rem);
+}
+
+.textLogo{
+    background: linear-gradient(to bottom, #00BFFF 50%, #120395 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.logoImage{
+    width: 2dvw;
+    aspect-ratio: 1/1;
+}
+
+.navigationButton{
+    color: white;
+    font-size: clamp(0.5rem, 1.1dvw, 1.5rem);
+    transition: all 0.5s ease;
+}
+
+.navigationButton:hover{
+    cursor: pointer;
+    color: rgb(172, 172, 172);
+    transform: scale(0.95);
+}
+
+.navigationButton.active{
+    background: linear-gradient(to bottom, #00BFFF 50%, #120395 100%);
+    font-size: clamp(0.5rem, 1.2dvw, 1.5rem);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    pointer-events: none;
+}

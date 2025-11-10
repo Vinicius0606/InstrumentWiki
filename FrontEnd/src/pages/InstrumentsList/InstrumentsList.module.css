@@ -1,0 +1,184 @@
+.div{
+    padding: 25px 15px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    font-size: clamp(1.5rem, 2.2dvw ,2.5rem);
+}
+
+.divInfo{
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.divInfoCards{
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    gap: 25px;
+    padding-bottom: 10px;
+}
+
+.divInfoCards::-webkit-scrollbar {
+    height: 8px;
+}
+
+.divInfoCards::-webkit-scrollbar-thumb {
+    background-color: rgba(100, 100, 100, 0.5);
+    border-radius: 4px;
+}
+
+.divInfoCards::-webkit-scrollbar-track {
+    
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.instrumentoCard{
+    display: flex;
+    flex-direction: column;
+    flex: 0 0 auto;
+    align-items: center;    
+    background-color: rgb(8, 8, 8);
+    border: 1px rgb(52, 52, 52) solid;
+    border-radius: 10px;
+    box-shadow: 7px 5px 15px rgb(28, 28, 28);
+    width: 18dvw;
+    height: 72dvh;
+
+    & img{
+        width: 100%;
+        aspect-ratio: 1/0.9;
+    }
+
+    & button{
+        width: 100%;
+        background: linear-gradient(to right, #00BFFF 0%, #120395 100%);
+        border-radius: 20px;
+        font-size: clamp(1.5rem, 2dvw, 2.5rem);
+    }
+
+}
+
+.instrumentoCard.active{
+    width: 90dvw;
+
+    & img{
+        height: 100%;
+        width: auto;
+    }
+}
+
+.instrumentoCardExpandedDivImage{
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 33%;
+    font-size: clamp(1rem, 1.5dvw, 2rem);
+}
+
+.instrumentoCardExpandedDivInfo{
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.instrumentoCardExpandedDivInfoNames{
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    padding: 10px 20px 20px 5px;
+    justify-content: space-between;
+    max-width: 72dvw;
+}
+
+.instrumentoCardExpandedDivInfoNames p{
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    width: 30%;
+    white-space: nowrap;
+}
+
+.fontColorGradiant{
+    background: linear-gradient(to bottom, #00BFFF 50%, #120395 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    max-width: 100%;
+}
+
+.scrollHorizontal{
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-x: auto;
+    white-space: nowrap;
+    max-width: 100%;
+
+    &::-webkit-scrollbar {
+        height: 2px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background-color: rgba(100, 100, 100, 0.5);
+        border-radius: 4px;
+    }
+
+    &::-webkit-scrollbar-track {
+        
+        background-color: rgba(0, 0, 0, 0.1);
+    }
+}
+
+.instrumentoCardExpandedDivDescricao{
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 33%;
+    font-size: clamp(1rem, 1.5dvw, 2rem);
+}
+
+.instrumentoCardDetails{
+    padding: 25px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    flex: 1;
+}
+
+.instrumentoCardDetailsText{
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    height: 20dvh;
+    max-width: 15dvw;
+}
+
+.instrumentoCardDetailsText h2{
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    flex: 1;
+    min-width: 0;
+    font-size: clamp(1.5rem, 1.5dvw, 2rem);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2em;
+    
+}
+
+.instrumentoCardDetailsText p{
+
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    flex: 1;
+    min-width: 0;
+    font-size: clamp(1rem, 1.25dvw, 2rem);
+    color: rgb(195, 195, 195);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.4em;
+    max-height: calc(1.4em * 2);
+}; 
