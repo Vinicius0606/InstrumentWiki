@@ -45,11 +45,14 @@
     border-radius: 10px;
     box-shadow: 7px 5px 15px rgb(28, 28, 28);
     width: 18dvw;
-    height: 72dvh;
+    height: 67dvh;
+
+    transition: all 1s ease;
 
     & img{
         width: 100%;
         aspect-ratio: 1/0.9;
+        cursor: pointer;
     }
 
     & button{
@@ -57,6 +60,7 @@
         background: linear-gradient(to right, #00BFFF 0%, #120395 100%);
         border-radius: 20px;
         font-size: clamp(1.5rem, 2dvw, 2.5rem);
+        cursor: pointer;
     }
 
 }
@@ -88,9 +92,10 @@
     width: 100%;
     display: flex;
     flex-direction: row;
-    padding: 10px 20px 20px 5px;
+    padding: 10px 20px 10px 5px;
     justify-content: space-between;
-    max-width: 72dvw;
+    max-width: 77dvw;
+    position: relative;
 }
 
 .instrumentoCardExpandedDivInfoNames p{
@@ -117,7 +122,7 @@
     max-width: 100%;
 
     &::-webkit-scrollbar {
-        height: 2px;
+        height: 4px;
     }
 
     &::-webkit-scrollbar-thumb {
@@ -135,9 +140,100 @@
     display: flex;
     flex-direction: row;
     width: 100%;
-    height: 33%;
+    flex: 1;
     font-size: clamp(1rem, 1.5dvw, 2rem);
+    padding: 20px 10px;
+    max-width: 85dvw;
+    justify-content: space-between;
 }
+
+.instrumentoCardExpandedDivDescricaoDiv{
+    max-width: 30%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.instrumentoCardExpandedDivDescricaoDivSection{
+    width: 25dvw;
+    max-width: 85dvw;
+    height: 48%;
+    display: flex;
+    flex-direction: column;  
+}
+
+.instrumentoCardExpandedDivDescricaoDivSectionAudios{
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+    margin-top: 10px;
+    overflow-x: auto;
+    width: 100%;
+    padding-bottom: 4px;
+
+    &::-webkit-scrollbar {
+        height: 4px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background-color: rgba(100, 100, 100, 0.5);
+        border-radius: 4px;
+    }
+
+    &::-webkit-scrollbar-track {
+        
+        background-color: rgba(0, 0, 0, 0.1);
+    }
+}
+
+.instrumentoCardExpandedDivDescricaoDivSectionAudiosCard{
+    max-width: 35%;
+    min-width: 35%;
+    background-color: rgb(14, 14, 14);
+    padding: 10px 5px;
+    font-size: clamp(0.5rem, 1.2dvw, 1.5rem);
+    border: 1px rgb(52, 52, 52) solid;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+
+    & button{
+        width: 100%;
+        font-size: clamp(0.5rem, 1dvw, 1.5rem);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        padding: 5px;
+        cursor: pointer;
+    }
+}
+
+.scrollVertical{
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-y: auto;
+    max-width: 100%;
+    max-height: 15dvh;
+    white-space: pre-line;
+    overflow-wrap: break-word;
+
+    &::-webkit-scrollbar {
+        height: 2px;
+        width: 4px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background-color: rgba(100, 100, 100, 0.5);
+        border-radius: 4px;
+    }
+
+    &::-webkit-scrollbar-track {
+        
+        background-color: rgba(0, 0, 0, 0.1);
+    }
+}
+
 
 .instrumentoCardDetails{
     padding: 25px 20px;
@@ -153,6 +249,7 @@
     gap: 15px;
     height: 20dvh;
     max-width: 15dvw;
+    cursor: pointer;
 }
 
 .instrumentoCardDetailsText h2{
@@ -165,7 +262,6 @@
     overflow: hidden;
     text-overflow: ellipsis;
     line-height: 1.2em;
-    
 }
 
 .instrumentoCardDetailsText p{
@@ -181,4 +277,75 @@
     text-overflow: ellipsis;
     line-height: 1.4em;
     max-height: calc(1.4em * 2);
-}; 
+}
+
+.closeIcon{
+    position: absolute;
+    color: white;
+    right: 0;
+    top: 10;
+    width: 2dvw;
+    height: 2dvw;
+}
+
+.menuAudio{
+    position: absolute;
+    background-color: rgb(8, 8, 8);
+    width: 40dvw;
+    height: fit-content;
+    border: 1px rgb(52, 52, 52) solid;
+    border-radius: 20px;
+    left: 25%;
+    top: 10%;
+    display: flex;
+    flex-direction: column;
+    padding: 10px 20px 20px 20px;
+    font-size: clamp(1rem, 1.5dvw, 2rem);
+    gap: 20px;
+    opacity: 1;
+    pointer-events: auto;
+    transition: all 0.5s ease;
+}
+
+.menuAudio.desativado{
+    opacity: 0;
+    pointer-events: none;
+    width: 0;
+    height: 0;
+}
+
+.menuAudioInfoRow{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    justify-content: space-between;
+
+    & p{
+        width: 45%;
+    }
+}
+
+.menuAudioInfoColumn{
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    height: fit-content;
+    max-height: 30%;
+}
+
+.menuAudioInfoBotoes{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    
+    & button{
+        width: 35%;
+        height: fit-content;
+        background: linear-gradient(to right, #00BFFF 0%, #120395 100%);
+        border-radius: 20px;
+        font-size: clamp(1.5rem, 1.5dvw, 2.5rem);
+        padding: 0px 5px;
+        cursor: pointer;
+    }
+}

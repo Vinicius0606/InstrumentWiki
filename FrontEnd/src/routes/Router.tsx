@@ -5,7 +5,7 @@ export default function Router() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<InstrumentsList />} />    
+        <Route path="/" element={<InstrumentsList />} />
       </Routes>
     </BrowserRouter>
   );

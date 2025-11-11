@@ -4,11 +4,11 @@ export type Generico = {
     descricao: string | null;
 }
 
-export type Audio = {
+export type AudioTipo = {
     info: Generico;
     audio: string;
     nota: string;
-    oitava: string;
+    oitava: number;
     bpm: number | null;
     creditos: string | null;
 }
@@ -68,15 +68,15 @@ export type InstrumentoEspecializacao = {
 }
 
 export type Instrumento = {
-    info: Generico; // descricao
-    familia_instrumento: Generico; //
+    info: Generico; 
+    familia_instrumento: Generico; 
     historia: string; 
-    classificacao_sonoridade: string; //
-    imagem: string | null; //
-    apelidos: string[] | null; //
-    audios: Audio[] | null;
-    partesMateriais: ParteMaterial[] | null;
-    alcances: AlcanceInstrumento[];
-    afinacao: Afinacao; // descricao 
-    especializacoes: InstrumentoEspecializacao; //
+    classificacao_sonoridade: string; 
+    imagem: string | null; 
+    apelidos: string[] | null; 
+    audios: AudioTipo[] | null; 
+    partesMateriais: ParteMaterial[] | null; 
+    alcances: AlcanceInstrumento[]; 
+    afinacao: Afinacao; 
+    especializacoes: InstrumentoEspecializacao; 
 }
