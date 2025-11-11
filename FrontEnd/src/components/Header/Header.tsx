@@ -15,26 +15,29 @@ export default function Header({ ActiveButton }: HeaderProps) {
                 <h1 className={styles.textLogo}>InstrumentsWiki</h1>
             </div>
 
-            <Link to={"/"}
-            className={`${styles.navigationButton} ${ActiveButton === 1 ? styles.active : ''}`}>
-                <p>Instrumentos</p>
-            </Link>
+            <div className={styles.headerLinks}>
 
-            <button className={`${styles.navigationButton} ${ActiveButton === 2 ? styles.active : ''}`}>
-                <p>Adicionar</p>
-            </button>
+                <Link to={"/"}
+                    className={`${styles.navigationButton} ${ActiveButton === 1 ? styles.active : ''}`}>
+                    <p>Instrumentos</p>
+                </Link>
 
-            <button className={`${styles.navigationButton} ${ActiveButton === 3 ? styles.active : ''}`}>
-                <p>Remover</p>
-            </button>
+                <button className={`${styles.navigationButton} ${ActiveButton === 2 ? styles.active : ''}`}>
+                    <p>Adicionar</p>
+                </button>
 
-            <button className={`${styles.navigationButton} ${ActiveButton === 4 ? styles.active : ''}`}>
-                <p>Editar</p>
-            </button>
+                <button className={`${styles.navigationButton} ${ActiveButton === 3 ? styles.active : ''}`}>
+                    <p>Remover</p>
+                </button>
 
-            <button className={`${styles.navigationButton} ${ActiveButton === 5 ? styles.active : ''}`}>
-                <p>Perfil</p>
-            </button>
+                <button className={`${styles.navigationButton} ${ActiveButton === 4 ? styles.active : ''}`}>
+                    <p>Editar</p>
+                </button>
+
+                <button className={`${styles.navigationButton} ${ActiveButton === 5 ? styles.active : ''}`}>
+                    <p>Perfil</p>
+                </button>
+            </div>
         </nav>
     )
 }
