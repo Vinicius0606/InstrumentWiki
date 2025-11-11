@@ -22,9 +22,10 @@ export default function Header({ ActiveButton }: HeaderProps) {
                     <p>Instrumentos</p>
                 </Link>
 
-                <button className={`${styles.navigationButton} ${ActiveButton === 2 ? styles.active : ''}`}>
+                <Link to={"/adicionar"} 
+                    className={`${styles.navigationButton} ${ActiveButton === 2 ? styles.active : ''}`}>
                     <p>Adicionar</p>
-                </button>
+                </Link>
 
                 <button className={`${styles.navigationButton} ${ActiveButton === 3 ? styles.active : ''}`}>
                     <p>Remover</p>
