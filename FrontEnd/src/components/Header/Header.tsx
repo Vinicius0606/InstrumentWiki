@@ -4,8 +4,7 @@ import { Link } from "react-router-dom"
 import { useRef, useState } from "react"
 
 type HeaderProps = {
-    ActiveButton: number;
-}
+    ActiveButton: number;}
 
 export default function Header({ ActiveButton }: HeaderProps) {
     
@@ -67,22 +66,24 @@ export default function Header({ ActiveButton }: HeaderProps) {
                 </button>
 
                 <div className={styles.menu} style={menuStyle}>
-                    <Link to={`${opcaoMenu}Generico`} className={styles.link}>
+                    <Link to={`/${opcaoMenu}Generico/Família`} className={styles.link}>
                         <p>Família Instrumento</p>
                     </Link>
-                    <Link to={`${opcaoMenu}Instrumento`} className={styles.link}>
+                    <Link to={opcaoMenu !== "remover"? `/${opcaoMenu}Instrumento` : 
+                        `/${opcaoMenu}Generico/Instrumento`} className={styles.link}>
                         <p>Instrumento</p>
                     </Link>
-                    <Link to={`${opcaoMenu}Audio`} className={styles.link}>
+                    <Link to={opcaoMenu !== "remover" ? `/${opcaoMenu}Áudio` : 
+                        `/${opcaoMenu}Generico/Áudio`} className={styles.link}>
                         <p>Áudio</p>
                     </Link>
-                    <Link to={`${opcaoMenu}Generico`} className={styles.link}>
+                    <Link to={`/${opcaoMenu}Generico/Afinação`} className={styles.link}>
                         <p>Afinação</p>
                     </Link>
-                    <Link to={`${opcaoMenu}Generico`} className={styles.link}>
+                    <Link to={`/${opcaoMenu}Generico/Material`} className={styles.link}>
                         <p>Material</p>
                     </Link>
-                    <Link to={`${opcaoMenu}Generico`} className={styles.link}>
+                    <Link to={`/${opcaoMenu}Generico/Técnica`} className={styles.link}>
                         <p>Técnica</p>
                     </Link>
                 </div>

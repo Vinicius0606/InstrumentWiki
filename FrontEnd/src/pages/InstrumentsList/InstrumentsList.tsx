@@ -7,7 +7,7 @@ import { IoMdClose } from "react-icons/io";
 export default function InstrumentsList() {
 
     const [instrumentos, setInstrumentos] = useState<Instrumento[]>([]);
-    const [instrumentoAtivo, setInstrumentoAtivo] = useState<number>(-1);
+    const [instrumentoAtivo, setInstrumentoAtivo] = useState<string>("-1");
     const [audioDoMenuAtivo, setAudioDoMenuAtivo] = useState<AudioTipo | null>(null);
     const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -37,18 +37,18 @@ export default function InstrumentsList() {
                 instrumentos.push({
 
                     info: {
-                        id: i + 1,
+                        id: "teste",
                         nome: "Piano",
                         descricao: "Um instrumento de teclado."
                     },
                     familia_instrumento: {
-                        id: 1,
+                        id: "1",
                         nome: "Cordas",
                         descricao: "Instrumentos de cordas."
                     },
                     afinacao: {
                         info: {
-                            id: 1,
+                            id: "1",
                             nome: "Piano Afinado",
                             descricao: "Afinacao padrao do piano."
                         },
@@ -62,7 +62,7 @@ export default function InstrumentsList() {
                     audios: [
                         {
                             info: {
-                                id: 1,
+                                id: "1",
                                 nome: "Som do Piano",
                                 descricao: "Um som suave de piano."
                             },
@@ -128,7 +128,7 @@ export default function InstrumentsList() {
 
     return (
         <div className={styles.div}>
-            <Header ActiveButton={1} />
+            <Header ActiveButton={1}/>
             <main className={styles.divInfo}>
                 <h1>Instrumentos:</h1>
                 <div className={styles.divInfoCards}>
@@ -156,7 +156,7 @@ export default function InstrumentsList() {
                                                     <span className={styles.scrollHorizontal}>{instrumento.classificacao_sonoridade}</span>
                                                 </p>
                                                 <IoMdClose className={styles.closeIcon}
-                                                    onClick={() => setInstrumentoAtivo(-1)} />
+                                                    onClick={() => setInstrumentoAtivo("-1")} />
                                             </div>
                                             <div className={styles.instrumentoCardExpandedDivInfoNames}>
                                                 <p>

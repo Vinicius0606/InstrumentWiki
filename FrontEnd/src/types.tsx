@@ -1,5 +1,5 @@
 export type Generico = {
-    id: number;
+    id: string;
     nome: string;
     descricao: string | null;
 }

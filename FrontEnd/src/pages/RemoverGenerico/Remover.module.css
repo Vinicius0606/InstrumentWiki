@@ -1,0 +1,152 @@
+.div {
+    padding: 25px 15px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    font-size: clamp(1.5rem, 2.2dvw, 2.5rem);
+}
+
+.main {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    margin-right: 10%;
+    margin-left: 10%;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.label {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: clamp(1rem, 1.5dvw, 2rem);
+}
+
+.input {
+    font-size: clamp(1rem, 1.5dvw, 2rem);
+    padding: 8px;
+    border-radius: 5px;
+    border: 2px solid #ccc;
+    box-shadow: 0px 0px 30px rgb(255, 255, 255, 0.3);
+}
+
+.submit {
+    font-size: clamp(1rem, 1.5dvw, 2rem);
+    width: 100%;
+    padding: 10px;
+    margin-top: 15px;
+    border: none;
+    background: linear-gradient(to right, #00BFFF 0%, #120395 100%);
+    border-radius: 20px;
+    cursor: pointer;
+    text-shadow: 0px 0px 30px rgb(0, 0, 0);
+}
+
+.listaID{
+    width: 78dvw;
+    height: 39dvh;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.listaIDScroll{
+    display: flex;
+    flex-direction: row;
+    width: 78dvw;
+    height: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    gap: 20px;
+
+    &::-webkit-scrollbar {
+        height: 5px;
+        width: 4px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background-color: rgba(100, 100, 100, 0.5);
+        border-radius: 4px;
+    }
+
+    &::-webkit-scrollbar-track {
+        
+        background-color: rgba(0, 0, 0, 0.1);
+    }
+}
+
+.listaIDScrollCard{
+    display: flex;
+    flex-direction: column;
+    font-size: clamp(1rem, 1.25dvw, 2rem);
+    min-width: 30%;
+    height: 95%;
+    background-color: rgb(8, 8, 8);
+    border: 1px rgb(52, 52, 52) solid;
+    border-radius: 10px;
+    box-shadow: 7px 5px 15px rgb(28, 28, 28);
+    padding: 10px;
+    gap: 5px;
+}
+
+.listaIDScrollCardNomeID{
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    justify-content: space-between;
+
+    & p{
+        width: 50%;
+    }
+}
+
+.listaIDScrollCardDescricao{
+    margin-top: 10px;
+}
+
+.fontColorGradiant{
+    background: linear-gradient(to bottom, #00BFFF 50%, #120395 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    max-width: 100%;
+}
+
+.scrollVertical{
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-y: auto;
+    max-width: 100%;
+    max-height: 8dvh;
+    white-space: pre-line;
+    overflow-wrap: break-word;
+
+    &::-webkit-scrollbar {
+        height: 2px;
+        width: 4px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background-color: rgba(100, 100, 100, 0.5);
+        border-radius: 4px;
+    }
+
+    &::-webkit-scrollbar-track {
+        
+        background-color: rgba(0, 0, 0, 0.1);
+    }
+}
+
+.radioGroup {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    font-size: clamp(1rem, 1.5dvw, 2rem);
+}
