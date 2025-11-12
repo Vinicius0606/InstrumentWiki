@@ -34,7 +34,10 @@
     border-radius: 5px;
     border: 2px solid #ccc;
     box-shadow: 0px 0px 30px rgb(255, 255, 255, 0.3);
+}
 
+.label select {
+    background-color: #060219;
 }
 
 .submit {
@@ -65,4 +68,11 @@
 .afinacao input {
     box-shadow: 0px 0px 30px rgb(0, 0, 0, 0.3);
     text-shadow: 0px 0px 30px rgb(0, 0, 0, 0.3);
+}
+
+.radioGroup {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
 }

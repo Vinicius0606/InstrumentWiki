@@ -33,7 +33,7 @@ export type Afinacao = {
     contexto: string;
 }
 
-const AfinacaoTransposicao = {
+export const AfinacaoTransposicao = {
     C: "C",
     Bb: "BB",
     Eb: "EB",
@@ -41,7 +41,7 @@ const AfinacaoTransposicao = {
     OUTRO: "OUTRO"
 } as const;
 
-const CategoriaPercussao = {
+export const CategoriaPercussao = {
     MEMBRANOFONE: "MEMBRANOFONE",
     IDIOFONE: "IDIOFONE",
     ELECTROFONE: "ELECTROFONE",
@@ -49,7 +49,7 @@ const CategoriaPercussao = {
     CORDOFONE: "CORDOFONE"
 } as const;
 
-const TocadoCom = {
+export const TocadoCom = {
     BAQUETAS: "BAQUETAS",
     MAO: "MAO",
     HIBRIDO: "HIBRIDO",
