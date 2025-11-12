@@ -57,3 +57,25 @@
     -webkit-text-fill-color: transparent;
     pointer-events: none;
 }
+
+.menu{
+    background-color: rgb(8, 8, 8);
+    display: flex;
+    flex-direction: column;
+    border: 1px rgb(52, 52, 52) solid;
+    border-radius: 10px;
+    box-shadow: 7px 5px 15px rgb(28, 28, 28);
+    font-size: clamp(0.5rem, 1dvw, 1rem);
+}
+
+.link{
+    border-bottom: 1px rgb(52, 52, 52) solid;
+    padding: 5px 10px;
+}
+
+.link:hover{
+    background: linear-gradient(to right, #00BFFF 50%, #120395 100%);
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-color: black;
+}

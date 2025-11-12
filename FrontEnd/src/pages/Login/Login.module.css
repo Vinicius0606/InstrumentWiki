@@ -1,0 +1,47 @@
+.body{
+    height: 100dvh;
+    width: 100dvw;
+    display: flex;
+    justify-content: center;
+}
+
+.div{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+}
+
+.divInfoInputs{
+    display: flex;
+    flex-direction: column;
+    gap: 34px;
+}
+
+.divPageInfo{
+    display: flex;
+    flex-direction: column;
+    font-size: clamp(2rem, 3dvw, 3rem);
+    align-items: center;
+    gap: 34px;
+}
+
+.headerLogo{
+    display: flex;
+    flex-direction: row;
+    text-align: center;
+    align-items: center;
+    font-size: clamp(2rem, 3dvw, 3rem);
+    margin-right: auto;
+}
+
+.textLogo{
+    background: linear-gradient(to bottom, #00BFFF 50%, #120395 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.logoImage{
+    width: 5dvw;
+    aspect-ratio: 1/1;
+}
