@@ -1,15 +1,19 @@
 import styles from "./InstrumentsList.module.css";
 import Header from "../../components/Header/Header";
-import type { Instrumento, AudioTipo } from "../../types";
-import { useRef, useState } from "react";
+import type { Instrumento, AudioTipo, Usuario } from "../../types";
+import { useEffect, useRef, useState } from "react";
 import { IoMdClose } from "react-icons/io";
+import { useNavigate } from "react-router-dom";
 
 export default function InstrumentsList() {
 
     const [instrumentos, setInstrumentos] = useState<Instrumento[]>([]);
-    const [instrumentoAtivo, setInstrumentoAtivo] = useState<string>("-1");
+    const [instrumentoAtivo, setInstrumentoAtivo] = useState<String>("-1");
     const [audioDoMenuAtivo, setAudioDoMenuAtivo] = useState<AudioTipo | null>(null);
     const audioRef = useRef<HTMLAudioElement | null>(null);
+    const [usuario, setUsuario] = useState<Usuario>()
+
+    const navigate = useNavigate();
 
     const tocarAudio = (audio: AudioTipo | null | undefined) => {
 
@@ -28,107 +32,76 @@ export default function InstrumentsList() {
         }
     }
 
-    useState(() => {
-        setInstrumentos(() => {
+    async function coletarInstrumentos(){
+        
+        try{
+            const res = await fetch(`http://localhost:5000/instrumentosGet`, {
+                credentials: "include",
+            })
 
-            const instrumentos: Instrumento[] = [];
-
-            for (let i = 0; i < 10; i++) {
-                instrumentos.push({
-
-                    info: {
-                        id: "teste",
-                        nome: "Piano",
-                        descricao: "Um instrumento de teclado."
-                    },
-                    familia_instrumento: {
-                        id: "1",
-                        nome: "Cordas",
-                        descricao: "Instrumentos de cordas."
-                    },
-                    afinacao: {
-                        info: {
-                            id: "1",
-                            nome: "Piano Afinado",
-                            descricao: "Afinacao padrao do piano."
-                        },
-                        referencia: "A440",
-                        contexto: "Concerto"
-                    },
-                    historia: "O piano foi inventado no século XVIII...",
-                    classificacao_sonoridade: "Cordofone",
-                    imagem: "/piano.png",
-                    apelidos: ["Teclado", "Pianoforte"],
-                    audios: [
-                        {
-                            info: {
-                                id: "1",
-                                nome: "Som do Piano",
-                                descricao: "Um som suave de piano."
-                            },
-                            audio: "/piano.wav",
-                            nota: "C4",
-                            oitava: 4,
-                            bpm: null,
-                            creditos: "Gravado por Fulano"
-                        }],
-                    partesMateriais: [
-                        {
-                            parteNome: "Teclado",
-                            parteDescricao: "Parte do piano onde as teclas estão localizadas.",
-                            materialId: 1,
-                            materialNome: "Madeira",
-                            materialDescricao: "Madeira de alta qualidade usada para o teclado."
-                        },
-                        {
-                            parteNome: "Cordas",
-                            parteDescricao: "Cordas do piano que produzem som quando as teclas são pressionadas.",
-                            materialId: 2,
-                            materialNome: "Aço",
-                            materialDescricao: "Cordas de aço usadas para produzir som no piano."
-                        },
-                        {
-                            parteNome: "Martelo",
-                            parteDescricao: "Parte do piano que bate nas cordas para produzir som.",
-                            materialId: 3,
-                            materialNome: "Feltro",
-                            materialDescricao: "Feltro usado para cobrir o martelo."
-                        },
-                        {
-                            parteNome: "Pedal",
-                            parteDescricao: "Pedal do piano usado para sustentar as notas.",
-                            materialId: 4,
-                            materialNome: "Metal",
-                            materialDescricao: "Metal usado para fabricar o pedal."
-                        }
-                    ],
-                    alcances: [
-                        {
-                            tipo: "Completo",
-                            nota_min: "A0",
-                            nota_max: "C8"
-                        }
-                    ],
-                    especializacoes: {
-                        especializacao: "Tipo de Piano",
-                        opcao1: 88,
-                        opcao1Nome: "Número de Teclas",
-                        opcao2: "C",
-                        opcao2Nome: "Transposição",
-                        opcao3: "MAO",
-                        opcao3Nome: "Tocado Com"
-                    },
-                });
+            if(res.status != 200){
+                
+                navigate("/", { replace: true});
+                
+                return;
             }
 
-            return instrumentos;
-        })
+            const dado = await res.json();
+            
+            setInstrumentos(dado);
+        
+        } catch(erro){
+            
+            alert("Erro no sistema!");
+            console.log(erro);
+            
+            return;
+        }
+        
+    }
 
-    });
+    // const verificarToken = async () => {
+
+    //     try{
+    //         const res = await fetch(`http://localhost:5000/testarToken`, {
+    //             credentials: "include",
+    //         })
+
+    //         if(res.status !== 200){
+
+    //             navigate("/login", { replace: true })
+
+    //             return;
+    //         }
+
+    //         const data = await res.json()
+
+    //         setUsuario(data)
+
+    //         console.log(data);
+
+    //         
+
+    //     } catch(erro){
+
+    //         alert("Erro no sistema!");
+    //         console.log(erro);
+            
+    //         return;
+    //     }
+        
+    // }
+
+        useEffect(() => {
+
+            coletarInstrumentos();
+    //     verificarToken();
+
+        }, []);
 
     return (
         <div className={styles.div}>
-            <Header ActiveButton={1}/>
+            <Header ActiveButton={1} usuario={usuario}/>
             <main className={styles.divInfo}>
                 <h1>Instrumentos:</h1>
                 <div className={styles.divInfoCards}>
@@ -262,12 +235,7 @@ export default function InstrumentsList() {
                                                     Alcance(s) do Instrumento:
                                                 </p>
                                                 <p className={styles.scrollVertical}>
-                                                    {instrumento.alcances ? instrumento.alcances.map((alcance) => {
-
-
-                                                        return (alcance.tipo + ": " + alcance.nota_min + " -> " + alcance.nota_max)
-                                                    }).join("\n") : "N/A"
-                                                    }
+                                                    {"C -> F"}
                                                 </p>
                                             </div>
                                         </div>
@@ -277,7 +245,7 @@ export default function InstrumentsList() {
                         } else {
                             conteudo = (
                                 <>
-                                    <img src={instrumento.imagem ?? ""} alt="" onClick={() => {
+                                    <img src={instrumento.imagem ?? "/semImagem.png"} alt="" onClick={() => {
                                         if (instrumento.info.id !== instrumentoAtivo) setInstrumentoAtivo(instrumento.info.id)
                                     }}/>
                                     <div className={styles.instrumentoCardDetails}>

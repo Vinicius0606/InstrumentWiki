@@ -55,6 +55,7 @@
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
+    pointer-events: none;
 }
 
 .menu{
@@ -77,4 +78,9 @@
     background-clip: text;
     -webkit-text-fill-color: transparent;
     background-color: black;
+}
+
+.informacaoMenu{
+    border-bottom: 1px rgb(52, 52, 52) solid;
+    padding: 5px 10px;
 }

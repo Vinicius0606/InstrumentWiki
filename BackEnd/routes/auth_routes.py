@@ -1,10 +1,10 @@
-from flask import Blueprint, request, jsonify, current_app, g
+from flask import Blueprint, request, json, jsonify, current_app, g
 import bcrypt
 import jwt
 import unicodedata
-
-
-#  arrumar a função de fknullget e get por Id
+import re
+from datetime import datetime, timedelta, timezone
+from app.middleware.auth_middleware import jwt_required 
  
 def normalizarTexto(texto):
 
@@ -20,13 +20,24 @@ def normalizarTexto(texto):
 auth_routes = Blueprint("auth_routes", __name__)
  
 @auth_routes.route("/instrumentosGet", methods=["GET"])
+@jwt_required
  
 def instrumentosGet():
  
     db_connection = current_app.db_connection
+
+    db_connection.ping(reconnect=True)
+
+    redis = current_app.redis
  
     cursor = db_connection.cursor()
- 
+
+    cache_key = "instrumentos:todos"
+
+    cache = redis.get(cache_key)
+    if cache:
+        return jsonify(json.loads(cache)), 200
+    
     try:
  
         cursor.execute(
@@ -121,15 +132,16 @@ def instrumentosGet():
                     break
  
             for af in instrumentoAfinacao:
- 
+           
                 if af[0] == i[0]:
                     afinacao = list(af)
                     break
            
             for e in instrumentoEspecializacao:
- 
+               
                 if e[0] == i[0]:
                     especializacao = list(e)
+                    print(2)
                     break
            
             if especializacao[1] != None:
@@ -166,13 +178,13 @@ def instrumentosGet():
                     "historia": info[3],
  
                     "classificao_sonoridade": info[4],
-
+ 
                     "imagem": None,
-
+ 
                     "apelidos": None,
-
+ 
                     "audios": None,
-                    
+                   
                     "partesMateriais": None,
  
                     "alcances": {
@@ -193,20 +205,24 @@ def instrumentosGet():
  
                     "especializacoes": {
  
-                        "especializacao": especializacaoNomes[0],
-                        "opcao1": especializacao[1],
-                        "opcao1Nome": especializacaoNomes[1],
-                        "opcao2": especializacao[2],
-                        "opcao2Nome": especializacaoNomes[2],
-                        "opcao3": especializacao[3],
-                        "opcao3Nome": especializacaoNomes[3]
+                        "especializacao": especializacaoNomes[0] if len(especializacaoNomes) > 0 else None,
+                        "opcao1": especializacao[1] if len(especializacao) > 0 else None,
+                        "opcao1Nome": especializacaoNomes[1] if len(especializacaoNomes) > 0 else None,
+                        "opcao2": especializacao[2] if len(especializacao) > 0 else None,
+                        "opcao2Nome": especializacaoNomes[2] if len(especializacaoNomes) > 0 else None,
+                        "opcao3": especializacao[3] if len(especializacao) > 0 else None,
+                        "opcao3Nome": especializacaoNomes[3] if len(especializacaoNomes) > 0 else None
                     }
                 }
             )
+
+        redis.setex(cache_key, 300, json.dumps(instrumentosCompletos))
  
         return jsonify(instrumentosCompletos), 200
  
     except Exception as e:
+ 
+        print(str(e))
        
         return jsonify("Erro: ", str(e)), 500
    
@@ -215,16 +231,30 @@ def instrumentosGet():
         cursor.close()
 
 @auth_routes.route("/instrumentosInfoGet", methods=["GET"])
+@jwt_required
 
 def instrumentosInfoGet():
 
     db_connection = current_app.db_connection
+
+    db_connection.ping(reconnect=True)
+
+    redis = current_app.redis
  
     cursor = db_connection.cursor()
 
     data = request.args
 
-    id = data.get("id")
+    id = data.get("id", "")
+
+    if not id:
+        return jsonify({"erro": "id deve ser enviado"}), 400
+    
+    cache_key = f"instrumentos:info:{id}"
+
+    cache = redis.get(cache_key)
+    if cache:
+        return jsonify(json.loads(cache)), 200
 
     try:
  
@@ -335,7 +365,8 @@ def instrumentosInfoGet():
                 "referencia": afinacao[3] if len(instrumentoAfinacao) > 0 else None,
                 "contexto": afinacao[4] if len(instrumentoAfinacao) > 0 else None
             })         
-            
+
+        redis.setex(cache_key, 300, json.dumps(instrumentosCompletos))    
 
         return jsonify(instrumentosCompletos), 200
  
@@ -348,10 +379,15 @@ def instrumentosInfoGet():
         cursor.close()
 
 @auth_routes.route("/idFkNullGet", methods=["GET"])
+@jwt_required
 
 def idFkNullGet():
 
     db_connection = current_app.db_connection
+
+    db_connection.ping(reconnect=True)
+    
+    redis = current_app.redis
  
     cursor = db_connection.cursor()
 
@@ -359,18 +395,29 @@ def idFkNullGet():
 
     data = request.args
 
-    tabelaNome = data.get("tabelaNome")
+    nomeTabela = data.get("nomeTabela", "")
+
+    if not nomeTabela:
+        return jsonify({"erro": "nomeTabela deve ser enviado"}), 400
+
+    nomeTabela = normalizarTexto(nomeTabela)
+
+    cache_key = f"fknull:{nomeTabela}"
+
+    cache = redis.get(cache_key)
+    if cache:
+        return jsonify(json.loads(cache)), 200
 
     try:
 
-        if tabelaNome == "audio":
+        if nomeTabela == "audio":
 
             cursor.execute(
 
                 "SELECT id, titulo, descricao FROM audio WHERE instrumento_id IS NULL"
             )
             
-        elif tabelaNome == "afinacao":
+        elif nomeTabela == "afinacao":
 
             cursor.execute(
 
@@ -380,7 +427,7 @@ def idFkNullGet():
                 " WHERE ia.afinacao_id IS NULL" 
             )
 
-        elif tabelaNome == "tecnica":
+        elif nomeTabela == "tecnica":
 
             cursor.execute(
 
@@ -390,7 +437,7 @@ def idFkNullGet():
                 " WHERE at.tecnica_id IS NULL" 
             )
 
-        elif tabelaNome == "material":
+        elif nomeTabela == "material":
 
             cursor.execute(
 
@@ -405,7 +452,7 @@ def idFkNullGet():
 
         for i in lista:
 
-            if tabelaNome == "audio":
+            if nomeTabela == "audio":
 
                 retornos.append({
 
@@ -425,6 +472,8 @@ def idFkNullGet():
 
         db_connection.commit()
 
+        redis.setex(cache_key, 300, json.dumps(retornos))
+
         return jsonify(retornos), 200
 
     except Exception as e:
@@ -437,10 +486,15 @@ def idFkNullGet():
         cursor.close()
             
 @auth_routes.route("/verificarExistenciaGet", methods=["GET"])
+@jwt_required
 
 def verificarExistenciaGet():
 
     db_connection = current_app.db_connection
+
+    db_connection.ping(reconnect=True)
+
+    redis = current_app.redis
  
     cursor = db_connection.cursor()
 
@@ -452,7 +506,19 @@ def verificarExistenciaGet():
     nomeTabela = data.get("nomeTabela", "")
     id = data.get("id", "")
 
+    if not nomeTabela:
+        return jsonify({"erro": "nomeTabela deve ser enviado"}), 400
+    
+    if not id:
+        return jsonify({"erro": "id deve ser enviado"}), 400
+
     nomeTabela = normalizarTexto(nomeTabela)
+
+    cache_key = f"exists:{nomeTabela}:{id}"
+
+    cache = redis.get(cache_key)
+    if cache:
+        return jsonify(json.loads(cache)), 200
 
     try:    
 
@@ -466,6 +532,8 @@ def verificarExistenciaGet():
         if len(query) == 0: retornos["Exists"] = False
         else: retornos["Exists"] = True
 
+        redis.setex(cache_key, 60, json.dumps(retornos))
+
         return jsonify(retornos), 200
         
     except Exception as e:
@@ -477,11 +545,140 @@ def verificarExistenciaGet():
  
         cursor.close()
 
+@auth_routes.route("/retornarIDsGenerico", methods=["GET"])
+@jwt_required
+
+def retornarIDsGenerico():
+
+    db_connection = current_app.db_connection
+
+    db_connection.ping(reconnect=True)
+
+    redis = current_app.redis
+ 
+    cursor = db_connection.cursor()
+
+    data = request.args
+
+    nomeTabela = data.get("nomeTabela", "")
+
+    if not nomeTabela:
+        return jsonify({"Erro: ": "o nomeaTabela deve ser enviado"}), 404
+
+    nomeTabela = normalizarTexto(nomeTabela)
+
+    cache_key = f"ids:{nomeTabela}"
+
+    cache = redis.get(cache_key)
+    if cache:
+        return jsonify(json.loads(cache)), 200
+
+    query = "SELECT "
+
+    try:
+
+        if(nomeTabela == "Áudio"):
+
+            query += "id, titulo, descricao "
+        
+        else:
+
+            query += "id, nome, descricao "
+
+        query += "FROM " + nomeTabela
+
+        cursor.execute(query)
+
+        dadosTabela = list(cursor.fetchall())
+
+        retornos = list()
+
+        for dado in dadosTabela:
+
+            retornos.append({
+                "id": dado[0],
+                "nome": dado[1],
+                "descricao": dado[2]
+            })
+        
+        redis.setex(cache_key, 300, json.dumps(retornos))
+
+        return jsonify(retornos), 200
+    
+    except Exception as e:
+
+        print(str(e))
+
+        return jsonify({"Erro: ": str(e)}), 500
+    
+    finally:
+
+        cursor.close()
+
+@auth_routes.route("/testarToken", methods=["GET"])
+@jwt_required
+ 
+def testarToken():
+   
+    db_connection = current_app.db_connection
+
+    db_connection.ping(reconnect=True)
+ 
+    cursor = db_connection.cursor()
+ 
+    try:
+ 
+        cursor.execute(
+            """
+            SELECT gc.tipo, gc.adicionar, gc.editar, gc.remover, gc.modificar_permissoes
+            FROM usuarios u
+            LEFT JOIN grupos_usuarios gc ON u.tipo_permissao = gc.tipo
+            WHERE u.id = %s
+            """, (g.user_id)
+        )
+ 
+        resultado = cursor.fetchone()
+ 
+        if(len(resultado) != 5):
+ 
+            tipo = "adm"
+            adicionar = True
+            editar = True
+            remover = True
+            modificar_permissao = True
+ 
+        else:
+ 
+            tipo, adicionar, editar, remover, modificar_permissao = resultado
+       
+        return jsonify({
+            "tipo": tipo,
+            "nick": g.nick,
+            "adicionar": adicionar,
+            "editar": editar,
+            "remover": remover,
+            "modificar_permissao": modificar_permissao
+            }), 200
+   
+    except Exception as e:
+ 
+        print(e)
+        return jsonify({"Erro: ": str(e)}), 500
+   
+    finally:
+ 
+        cursor.close()
+
 @auth_routes.route("/inserirInstrumentoPost", methods=["POST"])
+@jwt_required
 
 def inserirInstrumentoPost():
 
     db_connection = current_app.db_connection
+
+    db_connection.ping(reconnect=True)
+
+    redis = current_app.redis
  
     cursor = db_connection.cursor()
 
@@ -489,11 +686,36 @@ def inserirInstrumentoPost():
 
     retornos = {}
 
-    familia_id = data.get("familia_id")
-    nome = data.get("nome") 
-    descricao = data.get("descricao", "")
-    historia = data.get("historia")
-    classificacao_sonoridade = data.get("classificacao_sonoridade")
+    familia_id = data.get("familia_id", "")
+    nome = data.get("nome", "") 
+    descricao = data.get("descricao", "") #opcional
+    historia = data.get("historia", "")
+    classificacao_sonoridade = data.get("classificacao_sonoridade", "")
+    atributoEspecializacao1 = data.get("atributoEspecializacao1", "")
+    atributoEspecializacao2 = data.get("atributoEspecializacao2", "")
+    atributoEspecializacao3 = data.get("atributoEspecializacao3", "")
+
+    if not familia_id:
+        return jsonify({"Erro: ": "familia_id deve ser enviado"}), 404
+    
+    if not nome:
+        return jsonify({"Erro: ": "o nome deve ser enviado"}), 404
+    
+    if not historia:
+        return jsonify({"Erro: ": "a historia deve ser enviada"}), 404
+    
+    if not classificacao_sonoridade:
+        return jsonify({"Erro: ": "a classificacao_sonoridade deve ser enviada"}), 404
+    
+    if not atributoEspecializacao1:
+        return jsonify({"Erro: ": "atributoEspecialiazacao1 deve ser enviado"}), 404
+    
+    if not atributoEspecializacao2:
+        return jsonify({"Erro: ": "atributoEspecialiazacao2 deve ser enviado"}), 404
+    
+    if not atributoEspecializacao3:
+        return jsonify({"Erro: ": "atributoEspecialiazacao3 deve ser enviado"}), 404
+    
 
     query = "INSERT INTO instrumento" 
 
@@ -514,10 +736,61 @@ def inserirInstrumentoPost():
             "(%s, %s, %s, %s, %s, %s)",(id[0], familia_id, nome, descricao, historia, classificacao_sonoridade)
         )
 
+        cursor.execute(
+               
+            """
+            SELECT ih.instrumento_id, im.instrumento_id, ir.instrumento_id FROM instrumento i 
+            LEFT JOIN instrumento_harmonico ih 
+            ON i.id = ih.instrumento_id 
+            LEFT JOIN instrumento_melodico im 
+            ON i.id = im.instrumento_id 
+            LEFT JOIN instrumento_ritmico ir 
+            ON i.id = ir.instrumento_id
+            """
+            )
+
+        verificarEspecializacao = list(cursor.fetchall())
+        especializacao = ""
+
+        for i in verificarEspecializacao:
+
+                if i[0] != None: especializacao = "instrumento_harmonico"
+                elif i[1] != None: especializacao = "instrumento_melodico"
+                else: especializacao = "instrumento_ritmico"
+
+        if especializacao == "instrumento_harmonico":
+
+            cursor.execute(
+
+                query + " (instrumento_id, polifonia_max, possui_pedal_sustain, suporta_acordes) VALUES " +
+                "(%s, %s, %s, %s)",(id[0], atributoEspecializacao1, atributoEspecializacao2, atributoEspecializacao3)
+            )
+
+        elif especializacao == "instrumento_melodico":
+
+            cursor.execute(
+
+                query + " (instrumento_id, transpositor, afinacao_transposicao, microtonalidade_suportada) VALUES " +
+                "(%s, %s, %s, %s)",(id[0], atributoEspecializacao1, atributoEspecializacao2, atributoEspecializacao3)
+            )
+        
+        else:
+
+            cursor.execute(
+
+                query + " (instrumento_id, altura_definida, categoria_percussao, tocado_com) VALUES " +
+                "(%s, %s, %s, %s)",(id[0], atributoEspecializacao1, atributoEspecializacao2, atributoEspecializacao3)
+            )
+
         retornos["ID"] = id[0]
         retornos["Codigo"] = 200
 
         db_connection.commit()
+
+        redis.delete("instrumentos:todos")
+        redis.delete(f"instrumentos:info:{id[0]}")
+
+        return jsonify(retornos), 200
 
     except Exception as e:
        
@@ -528,14 +801,17 @@ def inserirInstrumentoPost():
         
         cursor.close()
 
-    return retornos
-
 
 @auth_routes.route("/inserirAudioPost", methods=["POST"])
+@jwt_required
 
 def inserirAudioPost():
 
     db_connection = current_app.db_connection
+
+    db_connection.ping(reconnect=True)
+
+    redis = current_app.redis
  
     cursor = db_connection.cursor()
 
@@ -543,14 +819,30 @@ def inserirAudioPost():
 
     retornos = {}
 
-    instrumento_id = data.get("instrumento_id")
-    titulo = data.get("titulo") 
-    descricao = data.get("descricao", "")
-    nota = data.get("nota")
-    oitava = data.get("oitava")
-    bpm = data.get("bpm", "")
-    arquivo = data.get("arquivo")
-    credito_gravacao = data.get("credito_gravacao", "")
+    instrumento_id = data.get("instrumento_id", "")
+    titulo = data.get("titulo", "") 
+    descricao = data.get("descricao", "") #opcional
+    nota = data.get("nota", "")
+    oitava = data.get("oitava", "")
+    bpm = data.get("bpm", "") #opcional
+    arquivo = data.get("arquivo", "")
+    credito_gravacao = data.get("credito_gravacao", "") #opcional
+
+    if not instrumento_id:
+        return jsonify({"Erro: ": "instrumento_id deve ser enviado"}), 404
+    
+    if not titulo:
+        return jsonify({"Erro: ": "o titulo deve ser enviado"}), 404
+    
+    if not nota:
+        return jsonify({"Erro: ": "a nota deve ser enviada"}), 404
+    
+    if not oitava:
+        return jsonify({"Erro: ": "a oitava deve ser enviada"}), 404
+    
+    if not arquivo:
+        return jsonify({"Erro: ": "o arquivo deve ser enviado"}), 404
+    
 
     query = "INSERT INTO audio" 
 
@@ -576,6 +868,11 @@ def inserirAudioPost():
 
         db_connection.commit()
 
+        
+        redis.delete(f"instrumentos:info:{instrumento_id}")
+
+        return jsonify(retornos), 200
+
     except Exception as e:
        
         db_connection.rollback()
@@ -585,13 +882,16 @@ def inserirAudioPost():
         
         cursor.close()
 
-    return retornos
-
 @auth_routes.route("/inserirGenericoPost", methods=["POST"])
+@jwt_required
 
 def inserirGenericoPost():
 
     db_connection = current_app.db_connection
+
+    db_connection.ping(reconnect=True)
+
+    redis = current_app.redis
  
     cursor = db_connection.cursor()
 
@@ -599,29 +899,38 @@ def inserirGenericoPost():
 
     retornos = {}
 
-    tabelaNome = data.get("tabelaNome")
-    nome = data.get("nome")
-    descricao = data.get("descricao", "")
-    referencia = data.get("referencia", "")
+    nomeTabela = data.get("nomeTabela", "")
+    nome = data.get("nome", "")
+    descricao = data.get("descricao", "") #opcional
+    referencia = data.get("referencia", "") #opcional
 
-    tabelaNome = str(tabelaNome)
+    if not nomeTabela:
+        return jsonify({"Erro: ": "nomeTabela deve ser enviado"}), 404
+    
+    if not nome:
+        return jsonify({"Erro: ": "nome deve ser enviado"}), 404
+    
 
-    query = "INSERT INTO " + tabelaNome
+    nomeTabela = normalizarTexto(nomeTabela)
 
-    tabelaNome = tabelaNome[0:3].upper()
+    nomeTabela = str(nomeTabela)
+
+    query = "INSERT INTO " + nomeTabela
+
+    nomeTabela = nomeTabela[0:3].upper()
 
     try:
 
         cursor.execute(
 
             
-            "SELECT Gerar_ID_Generico('"+ tabelaNome +"') FROM audio limit 1"
+            "SELECT Gerar_ID_Generico('"+ nomeTabela +"') FROM audio limit 1"
             
         )
 
         id = list(cursor.fetchone())
 
-        if tabelaNome == "afinacao":
+        if nomeTabela == "afinacao":
 
             cursor.execute(
 
@@ -636,11 +945,17 @@ def inserirGenericoPost():
                 query + "(id, nome, descricao) VALUES " +
                 "(%s, %s, %s)",(id[0], nome, descricao)
             )
+        
+        db_connection.commit()
 
         retornos["ID"] = id[0]
         retornos["Codigo"] = 200
 
-        db_connection.commit()
+        redis.delete(f"ids:{nomeTabela}")
+        redis.delete(f"fknull:{nomeTabela}")
+        redis.delete(f"exists:{nomeTabela}:{id[0]}")
+
+        return jsonify(retornos), 200
 
     except Exception as e:
        
@@ -651,13 +966,186 @@ def inserirGenericoPost():
         
         cursor.close()
 
-    return retornos
+@auth_routes.route("/registerPost", methods=["POST"])
+ 
+def registerPost():
+    data = request.get_json()
+ 
+    nick = data.get("nick", "").replace(" ", "")
+    email = data.get("email", "").replace(" ", "").lower()
+    raw_password = data.get("password", "").strip()
+ 
+    email_template = r"^[\w\.-]+@[\w\.-]+\.\w+$"
+ 
+    password_template = {
+        "length": len(raw_password) >= 8,
+        "uppercase": bool(re.search(r"[A-Z]", raw_password)),
+        "lowercase": bool(re.search(r"[a-z]", raw_password)),
+        "number": bool(re.search(r"\d", raw_password)),
+        "special": bool(re.search(r"[^\w]", raw_password))        
+    }
+ 
+    if not re.match(r"^\w+$", nick):
+        return jsonify({"error": "Nick só pode conter letras, números e underline."}), 400
+ 
+    if not nick or not email or not raw_password:
+        return jsonify({"error": "Todos os campos são obrigatórios."}), 400
+ 
+    if not re.match(email_template, email):
+        return jsonify({"error": "E-mail invalido."}), 400
+   
+    if len(nick) < 3 or len(nick) > 32:
+ 
+        return jsonify({"error": "Tamanho do nick inválido."}), 400
+ 
+    if not all(password_template.values()):
+       
+        erros = [crit for crit, ok in password_template.items() if not ok]
+ 
+        return jsonify({"error": "Senha inválida.", "requisitos_nao_atendidos": erros}), 400
+ 
+    hashed_password = bcrypt.hashpw(raw_password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+ 
+    DbConnection = current_app.db_connection
+
+    DbConnection.ping(reconnect=True)
+    cursor = DbConnection.cursor()
+ 
+    try:
+        cursor.execute("""
+            SELECT id FROM usuarios WHERE nick = %s
+        """, (nick,))
+ 
+        existing_user_nick = cursor.fetchone()
+ 
+        if existing_user_nick:
+            return jsonify({"error": "Nick já está em uso."}), 409
+ 
+        cursor.execute("""
+            SELECT id FROM usuarios WHERE email = %s
+        """, (email,))
+ 
+        existing_user_email = cursor.fetchone()
+ 
+        if existing_user_email:
+            return jsonify({"error": "E-mail já está em uso."}), 409
+       
+        cursor.execute("""
+            INSERT INTO usuarios (id, nick, email, senha, tipo_permissao)
+            VALUES (Gerar_ID_Usuario(), %s, %s, %s, %s)
+        """, (nick, email, hashed_password, "user"))
+ 
+        DbConnection.commit()
+   
+    except Exception as e:
+       
+        DbConnection.rollback()
+
+        print(e)
+       
+        return jsonify({"error": "Erro ao registrar usuário", "details": str(e)}), 400
+   
+    finally:
+ 
+        cursor.close()
+ 
+    return jsonify({"message": "Usuário registrado com sucesso!"}), 201
+ 
+@auth_routes.route("/loginPost",methods=["POST"])
+ 
+def loginPost():
+ 
+    data = request.get_json()
+ 
+    nick = data.get("nick", "").strip()
+    raw_password = data.get("password", "").strip().encode("utf-8")
+ 
+    Dbconnection = current_app.db_connection
+
+    Dbconnection.ping(reconnect=True)
+    cursor = Dbconnection.cursor()
+ 
+    try:
+ 
+        cursor.execute("""
+            SELECT id, senha FROM usuarios
+            WHERE nick = %s
+        """, (nick,))
+   
+        result = cursor.fetchone()
+ 
+        if not result:
+            return jsonify({"error": "Usuário ou senha inexistentes. Acesso negado!"}), 401
+ 
+        user_id, hashed_password = result
+ 
+        hashed_password = hashed_password.encode("utf-8")
+ 
+        if bcrypt.checkpw(raw_password, hashed_password):
+ 
+            payload = {
+                "user_id": user_id,
+                "nick": nick,
+                "iat": datetime.now(timezone.utc),
+                "nbf": datetime.now(timezone.utc),
+                "exp": datetime.now(timezone.utc) + timedelta(hours=2),
+            }
+ 
+            token = jwt.encode(payload, current_app.config["SECRET_KEY"], algorithm="HS256")
+           
+            exp_time = datetime.now(timezone.utc) + timedelta(hours=2)
+ 
+            response = jsonify({"message": "Usuário e senha corretos."})
+            response.set_cookie(
+                "token",
+                token,
+                httponly=True,
+                secure=False,
+                samesite="Lax",
+                expires=exp_time
+            )
+ 
+            return response
+       
+        else:
+            return jsonify({"error": "Usuário ou senha inexistentes. Acesso negado!"}), 401
+ 
+    except Exception as e:
+ 
+        return jsonify({"erro": str(e)}), 500
+   
+    finally:
+ 
+        cursor.close()
+ 
+ 
+@auth_routes.route("/logoutPost", methods=["POST"])
+@jwt_required
+ 
+def logoutPost():
+ 
+    retorno = jsonify({"message": "Logout realizado com sucesso"})
+    retorno.set_cookie(
+                "token",
+                "",
+                httponly=True,
+                secure=False,
+                samesite="Lax",
+                expires=0
+            )
+   
+    return retorno
 
 @auth_routes.route("/atualizarInstrumentoPut", methods=["PUT"])
+@jwt_required
 
 def atualizarInstrumentoPut():
 
     db_connection = current_app.db_connection
+
+    db_connection.ping(reconnect=True)
+
+    redis = current_app.redis
  
     cursor = db_connection.cursor()
 
@@ -665,12 +1153,24 @@ def atualizarInstrumentoPut():
 
     retornos = dict()
    
-    familia_id = data.get("familia_id")
-    nome = data.get("nome") 
-    descricao = data.get("descricao", "")
-    historia = data.get("historia", "")
-    classificacao_sonoridade = data.get("classificacao_sonoridade")
-    id = data.get("id")
+    familia_id = data.get("familia_id", "")
+    nome = data.get("nome", "") 
+    descricao = data.get("descricao", "") #opcinal
+    historia = data.get("historia", "") #opcional
+    classificacao_sonoridade = data.get("classificacao_sonoridade", "")
+    id = data.get("id", "")
+
+    if not familia_id:
+        return jsonify({"Erro: ": "familia_id deve ser enviado"}), 404
+    
+    if not nome:
+        return jsonify({"Erro: ": "o nome deve ser enviado"}), 404
+    
+    if not classificacao_sonoridade:
+        return jsonify({"Erro: ": "a classificacao_sonoridade deve ser enviada"}), 404
+    
+    if not id:
+        return jsonify({"Erro: ": "id deve ser enviada"}), 404
 
     query = "UPDATE instrumento"
 
@@ -686,6 +1186,11 @@ def atualizarInstrumentoPut():
 
         db_connection.commit()
 
+        redis.delete("instrumentos:todos")
+        redis.delete(f"instrumentos:info:{id}")
+
+        return jsonify(retornos), 200
+
     except Exception as e:
        
         db_connection.rollback()
@@ -694,14 +1199,17 @@ def atualizarInstrumentoPut():
     finally:
         
         cursor.close()
-             
-    return retornos
 
 @auth_routes.route("/atualizarAudioPut", methods=["PUT"])
+@jwt_required
 
 def atualizarAudioPut():
 
     db_connection = current_app.db_connection
+
+    db_connection.ping(reconnect=True)
+
+    redis = current_app.redis
  
     cursor = db_connection.cursor()
 
@@ -709,15 +1217,33 @@ def atualizarAudioPut():
 
     retornos = dict()
    
-    instrumento_id = data.get("instrumento_id")
-    titulo = data.get("titulo") 
-    descricao = data.get("descricao", "")
+    instrumento_id = data.get("instrumento_id", "")
+    titulo = data.get("titulo", "") 
+    descricao = data.get("descricao", "") #opcional
     nota = data.get("nota", "")
-    oitava = data.get("oitava")
-    bpm = data.get("bpm", "")
-    arquivo = data.get("arquivo")
-    credito_gravacao = data.get("credito_gravacao", "")
-    id = data.get("id")
+    oitava = data.get("oitava", "")
+    bpm = data.get("bpm", "") #opcional
+    arquivo = data.get("arquivo", "")
+    credito_gravacao = data.get("credito_gravacao", "") #opcional
+    id = data.get("id", "")
+
+    if not instrumento_id:
+        return jsonify({"Erro: ": "instrumento_id deve ser enviado"}), 404
+    
+    if not titulo:
+        return jsonify({"Erro: ": "o titulo deve ser enviado"}), 404
+    
+    if not nota:
+        return jsonify({"Erro: ": "a nota deve ser enviada"}), 404
+    
+    if not oitava:
+        return jsonify({"Erro: ": "a oitava deve ser enviada"}), 404
+    
+    if not arquivo:
+        return jsonify({"Erro: ": "o arquivo deve ser enviado"}), 404
+    
+    if not id:
+        return jsonify({"Erro: ": "id deve ser enviado"}), 404
 
     query = "UPDATE audio"
 
@@ -734,6 +1260,10 @@ def atualizarAudioPut():
 
         db_connection.commit()
 
+        redis.delete(f"instrumentos:info:{instrumento_id}")
+
+        return jsonify(retornos), 200
+
     except Exception as e:
        
         db_connection.rollback()
@@ -742,14 +1272,17 @@ def atualizarAudioPut():
     finally:
         
         cursor.close()
-             
-    return retornos
 
 @auth_routes.route("/atualizarGenericoPut", methods=["PUT"])
+@jwt_required
 
 def atualizarGenericoPut():
 
     db_connection = current_app.db_connection
+
+    db_connection.ping(reconnect=True)
+
+    redis = current_app.redis
  
     cursor = db_connection.cursor()
 
@@ -757,17 +1290,29 @@ def atualizarGenericoPut():
 
     retornos = {}
 
-    tabelaNome = data.get("tabelaNome")
-    nome = data.get("nome")
-    descricao = data.get("descricao", "")
-    referencia = data.get("referencia", "")
-    id = data.get("id")
+    nomeTabela = data.get("nomeTabela", "")
+    nome = data.get("nome", "")
+    descricao = data.get("descricao", "") #opcional
+    referencia = data.get("referencia", "") #opcional
+    id = data.get("id", "")
 
-    query = "UPDATE " + tabelaNome
+    
+    if not nomeTabela:
+        return jsonify({"Erro: ": "nomeTabela deve ser enviado"}), 404
+    
+    if not nome:
+        return jsonify({"Erro: ": "nome deve ser enviado"}), 404
+    
+    
+    if not id:
+        return jsonify({"Erro: ": "id deve ser enviado"}), 404
+
+
+    query = "UPDATE " + nomeTabela
 
     try:
 
-        if tabelaNome == "afinacao":
+        if nomeTabela == "afinacao":
 
             cursor.execute(
 
@@ -787,6 +1332,12 @@ def atualizarGenericoPut():
 
         db_connection.commit()
 
+        redis.delete(f"ids:{nomeTabela}")
+        redis.delete(f"fknull:{nomeTabela}")
+        redis.delete(f"exists:{nomeTabela}:{id}")
+
+        return jsonify(retornos), 200
+
     except Exception as e:
        
         db_connection.rollback()
@@ -795,14 +1346,17 @@ def atualizarGenericoPut():
     finally:
         
         cursor.close()
-             
-    return retornos
 
 @auth_routes.route("/deletar", methods=["DELETE"])
+@jwt_required
 
 def deletar():
 
     db_connection = current_app.db_connection
+
+    db_connection.ping(reconnect=True)
+
+    redis = current_app.redis
  
     cursor = db_connection.cursor()
 
@@ -811,16 +1365,42 @@ def deletar():
     query = "DELETE FROM "
     retornos = dict()
 
-    nomeTabela = data.get("nomeTabela")
-    especializacao = data.get("especializacao", "")
-    id = data.get("id")
+    nomeTabela = data.get("nomeTabela", "")
+    id = data.get("id", "")
 
-    especializacao = normalizarTexto(especializacao)
+    if not nomeTabela:
+        return jsonify({"Erro: ": "nomeTabela deve ser enviado"}), 404
+    
+    if not id:
+        return jsonify({"Erro: ": "id deve ser enviado"}), 404
+
     nomeTabela = normalizarTexto(nomeTabela)
 
     try:
 
         if nomeTabela == "instrumento":
+
+            cursor.execute(
+               
+               """
+               SELECT ih.instrumento_id, im.instrumento_id, ir.instrumento_id FROM instrumento i 
+               LEFT JOIN instrumento_harmonico ih 
+               ON i.id = ih.instrumento_id 
+               LEFT JOIN instrumento_melodico im 
+               ON i.id = im.instrumento_id 
+               LEFT JOIN instrumento_ritmico ir 
+               ON i.id = ir.instrumento_id
+               """
+            )
+
+            verificarEspecializacao = list(cursor.fetchall())
+            especializacao = ""
+
+            for i in verificarEspecializacao:
+
+                if i[0] != None: especializacao = "instrumento_harmonico"
+                elif i[1] != None: especializacao = "instrumento_melodico"
+                else: especializacao = "instrumento_ritmico"
 
             cursor.execute(
                
@@ -830,7 +1410,7 @@ def deletar():
             cursor.execute(
                 """
                 SELECT a.id FROM audio a 
-                LEFT JOIN  instrumento i
+                LEFT JOIN  instrumento i 
                 ON i.id = a.instrumento_id 
                 WHERE i.id = %s
                 """, (id,)
@@ -838,9 +1418,27 @@ def deletar():
 
             verificaAudio = list(cursor.fetchall())
 
+            cursor.execute(
+                """
+                SELECT fi.id FROM INSTRUMENTO i 
+                LEFT JOIN  familia_instrumento fi 
+                ON i.familia_id = fi.id 
+                WHERE i.familia_id = %s
+                """, (id,)
+            )
+
+            verificaFamilia = list(cursor.fetchall())
+
             #404: Precisa deletar o registro em audio
-            if len(verificaAudio) != 0:
-                retornos = {"Codigo": 404}
+            if len(verificaAudio) != 0 or len(verificaFamilia) != 0:
+
+                if len(verificaAudio) != 0:
+                    retornos["Codigo"] = 404
+                    retornos["ID"] = verificaAudio[0]
+
+                if len(verificaFamilia) != 0:
+                    if 404 not in retornos: retornos["Codigo"] = 404
+                    retornos["ID"] = verificaFamilia[0]
 
                 return jsonify(retornos), 404
 
@@ -854,6 +1452,16 @@ def deletar():
 
         db_connection.commit()
 
+        redis.delete(f"ids:{nomeTabela}")
+        redis.delete(f"fknull:{nomeTabela}")
+        redis.delete(f"exists:{nomeTabela}:{id}")
+
+        if nomeTabela == "instrumento":
+            redis.delete("instrumentos:todos")
+            redis.delete(f"instrumentos:info:{id}")
+
+        return jsonify(retornos), 200
+
     except Exception as e:
 
         print(str(e))
@@ -864,64 +1472,3 @@ def deletar():
     finally:
         
         cursor.close()
-             
-    return jsonify(retornos),200
-
-@auth_routes.route("/retornarIDsGenerico", methods=["GET"])
-
-def retornarIDsGenerico():
-
-    db_connection = current_app.db_connection
- 
-    cursor = db_connection.cursor()
-
-    data = request.args
-
-    nomeTabela = data.get("nomeTabela", "")
-
-    if not nomeTabela:
-        return jsonify({"Erro: ": "o nome da tabela deve ser enviado"}), 404
-
-    nomeTabela = normalizarTexto(nomeTabela)
-
-    query = "SELECT "
-
-    try:
-
-        if(nomeTabela == "Áudio"):
-
-            query += "id, titulo, descricao "
-        
-        else:
-
-            query += "id, nome, descricao "
-
-        query += "FROM " + nomeTabela
-
-        cursor.execute(query)
-
-        dadosTabela = list(cursor.fetchall())
-
-        retorno = list()
-
-        for dado in dadosTabela:
-
-            retorno.append({
-                "id": dado[0],
-                "nome": dado[1],
-                "descricao": dado[2]
-            })
-
-        return jsonify(retorno), 200
-    
-    except Exception as e:
-
-        print(str(e))
-
-        return jsonify({"Erro: ": str(e)}), 500
-    
-    finally:
-
-        cursor.close()
-
-

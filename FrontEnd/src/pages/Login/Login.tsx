@@ -5,12 +5,6 @@ import styles from "./Login.module.css";
 import NotaMusical from "../../assets/notaMusical.png"
 
 export default function Login() {
-  // const location = useLocation();
-  // const state = location.state as { message?: string };
-
-  // if(state?.message){
-  //   alert(state.message);
-  // }
 
   const navigate = useNavigate();
 
@@ -35,8 +29,9 @@ export default function Login() {
 
       try{
 
-        const res = await fetch("/api/login", {
+        const res = await fetch("http://localhost:5000/loginPost", {
           method: "POST",
+          credentials: "include",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ nick, password }),
         });
@@ -45,12 +40,16 @@ export default function Login() {
 
           console.log("Login realizado com sucesso!");
           alert("Login realizado com sucesso!");
-          navigate("/Chats", { replace: true });
+
+          navigate("/", { replace: true });
+
           return;
         }
 
         const data = await res.json();
         const msg = data.error || data.erro || data.acesso || "Erro ao logar.";
+
+        console.log(data["error"]);
 
         if(/usuário|senha/i.test(msg)){
           

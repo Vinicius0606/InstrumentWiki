@@ -16,7 +16,7 @@ export type AudioTipo = {
 export type ParteMaterial = {
     parteNome: string;
     parteDescricao: string;
-    materialId: number;
+    materialId: string;
     materialNome: string;
     materialDescricao: string;
 }
@@ -70,7 +70,7 @@ export type InstrumentoEspecializacao = {
 export type Instrumento = {
     info: Generico; 
     familia_instrumento: Generico; 
-    historia: string; 
+    historia: string | null; 
     classificacao_sonoridade: string; 
     imagem: string | null; 
     apelidos: string[] | null; 
@@ -79,4 +79,13 @@ export type Instrumento = {
     alcances: AlcanceInstrumento[]; 
     afinacao: Afinacao; 
     especializacoes: InstrumentoEspecializacao; 
+}
+
+export type Usuario = {
+    tipo: String;
+    nick: String;
+    adicionar: boolean;
+    editar: boolean;
+    remover: boolean;
+    modificar_permissao: boolean;
 }

@@ -29,7 +29,7 @@ export default function Register() {
 
       try{
 
-        const res = await fetch("/api/register", {
+        const res = await fetch("http://localhost:5000/registerPost", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ nick, email, password }),
@@ -39,12 +39,14 @@ export default function Register() {
 
           console.log("Usuário registrado com sucesso!");
           
-          navigate("/");
+          navigate("/login");
 
           return;
         }
 
         const data = await res.json();
+
+        console.log(data["error"], data["details"]);
 
         if(/nick/i.test(data.error)){
           

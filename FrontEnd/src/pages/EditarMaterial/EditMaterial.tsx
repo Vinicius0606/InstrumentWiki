@@ -1,15 +1,13 @@
-import styles from "./Remover.module.css"
+import styles from "./EdiMaterial.module.css"
 import Header from "../../components/Header/Header"
 import { useEffect, useRef, useState } from "react";
 import type { Usuario, Generico } from "../../types";
 import { useParams, useNavigate } from "react-router-dom";
 
-
-export default function RemoverGenerico(){
+export default function editarMaterial(){
 
     const [id, setId] = useState<string>("");
     const [listaIds, setListaIds] = useState<Generico[] | null>(null);
-    const { nomeTabela, especializacao } = useParams();
     const inputRef = useRef<HTMLInputElement>(null);
     const [tipoEspecializacao, setTipoEspecializacao] = useState<string>("Harmônico");
     const [usuario, setUsuario] = useState<Usuario>();
@@ -19,7 +17,7 @@ export default function RemoverGenerico(){
     async function carregarIds() {
 
         try{
-            const res = await fetch(`http://localhost:5000/retornarIDsGenerico?nomeTabela=${nomeTabela}`, {
+            const res = await fetch(`http://localhost:5000/retornarIDsGenerico?nomeTabela=material`, {
             credentials: "include",
             })
 
@@ -104,58 +102,7 @@ export default function RemoverGenerico(){
         }else{
             
             try{
-                const res = await fetch(`http://localhost:5000/verificarExistenciaGet?nomeTabela=${nomeTabela}&id=${idFormatado}`, {
-                    credentials: "include",
-                })
-
-                if(res.status !== 200){
-
-                    navigate("/", { replace: true });
-                    alert("Erro ao deletar o dado");
-
-                    return;
-                }
-
-                const dado = await res.json();
-
-                console.log(dado);
-
-                if(!dado["Exists"]){
-
-                    inputRef.current?.setCustomValidity("Não existe nenhum dado com esse ID!");
-
-                    inputRef.current?.reportValidity();
-
-                    e.preventDefault();
-
-                    return;
-                }
-
-                const resDelete = await fetch(`http://localhost:5000/deletar?nomeTabela=${nomeTabela}&id=${idFormatado}&especializacao=${tipoEspecializacao}`, {
-                    method: "DELETE",
-                    credentials: "include",
-                })
-
-                if(resDelete.status === 404){
-
-                    inputRef.current?.setCustomValidity("Existe um áudio relacionado com esse dado, apague ele primeiro!");
-
-                    inputRef.current?.reportValidity();
-
-                    e.preventDefault();
-                    
-                    return
-                } else if (resDelete.status != 200){
-                    
-                    navigate("/", { replace: true });
-                    alert("Erro ao deletar o dado");
-
-                    return;
-                }
-
-                alert("Dado deletado com sucesso!!");
-
-                navigate("/", { replace: true });
+                navigate("/adicionarGenerico/Material/" + idFormatado, { replace: true });
 
             } catch(erro){
 
@@ -174,10 +121,10 @@ export default function RemoverGenerico(){
 
             <form action="" className={styles.form} onSubmit={handleSubmit}>
                 <main className={styles.main}>
-                    <h1>{nomeTabela}:</h1>
+                    <h1>Material:</h1>
 
                     <label className={styles.label}>
-                        ID do(a) {nomeTabela}:
+                        ID do(a) Material:
                         <input className={styles.input}
                             type="text"
                             onChange={(e) => {setId(e.target.value); e.currentTarget.setCustomValidity("")}}
@@ -188,7 +135,7 @@ export default function RemoverGenerico(){
                     </label>
 
                     <div className={styles.listaID}>
-                        <h1>Lista de Ids da tabela {nomeTabela}</h1>
+                        <h1>Lista de Ids da tabela material</h1>
                         <div className={styles.listaIDScroll}>
                             {
                                 listaIds ?

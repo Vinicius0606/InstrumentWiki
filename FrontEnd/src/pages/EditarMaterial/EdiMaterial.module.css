@@ -36,115 +36,16 @@
     box-shadow: 0px 0px 30px rgb(255, 255, 255, 0.3);
 }
 
-.label select {
-    background-color: #060219;
-    color: #FFFFFF88;
-}
-
 .submit {
     font-size: clamp(1rem, 1.5dvw, 2rem);
     width: 100%;
     padding: 10px;
     margin-top: 15px;
     border: none;
-    background: #00ad74;
-    border-radius: 20px;
-    cursor: pointer;
-    text-shadow: 0px 0px 30px rgb(0, 0, 0);
-}
-
-.buttonSecondary {
-    font-size: clamp(1rem, 1.5dvw, 2rem);
-    width: 100%;
-    padding: 10px;
-    margin-top: 15px;
-    border: none;
     background: linear-gradient(to right, #00BFFF 0%, #120395 100%);
     border-radius: 20px;
     cursor: pointer;
     text-shadow: 0px 0px 30px rgb(0, 0, 0);
-}
-
-.afinacao {
-    margin-top: 10px;
-    padding: 8px;
-    border-radius: 5px;
-    background: linear-gradient(to right, #00BFFF 0%, #120395 100%);
-    box-shadow: 0px 0px 30px rgb(255, 255, 255, 0.3);
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    font-size: clamp(1rem, 1.5dvw, 2rem);
-    text-shadow: 0px 0px 30px rgb(0, 0, 0, 0.5);
-}
-
-.afinacao input {
-    box-shadow: 0px 0px 30px rgb(0, 0, 0, 0.3);
-    text-shadow: 0px 0px 30px rgb(0, 0, 0, 0.3);
-}
-
-.horizontalGroup {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 10px;
-}
-
-.configButtons {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    gap: 10px;
-    margin-top: 20px;
-}
-
-.modalOverlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.6);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    animation: fadeIn 0.3s ease, slideIn 0.3s ease;
-}
-
-.modalContent {
-    background-color: #161d36;
-    padding: 2rem;
-    border-radius: 8px;
-    min-width: 600px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.modalLists {
-    margin-top: 20px;
-    max-height: 200px;
-    overflow-y: auto;
-    font-size: 1.4rem; 
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
-}
-
-@keyframes slideIn {
-    from {
-        transform: translateY(-20px);
-        opacity: 0;
-    }
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
 }
 
 .listaID{
@@ -242,59 +143,10 @@
     }
 }
 
-.configButtons {
+.radioGroup {
     display: flex;
     flex-direction: row;
-    flex-wrap: nowrap;
-    gap: 10px;
-    margin-top: 20px;
-}
-
-.modalOverlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.6);
-    display: flex;
-    justify-content: center;
     align-items: center;
-    z-index: 1000;
-    animation: fadeIn 0.3s ease, slideIn 0.3s ease;
-}
-
-.modalContent {
-    background-color: #161d36;
-    padding: 2rem;
-    border-radius: 8px;
-    min-width: 600px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.modalLists {
-    margin-top: 20px;
-    max-height: 200px;
-    overflow-y: auto;
-    font-size: 1.4rem; 
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
-}
-
-@keyframes slideIn {
-    from {
-        transform: translateY(-20px);
-        opacity: 0;
-    }
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
+    gap: 10px;
+    font-size: clamp(1rem, 1.5dvw, 2rem);
 }
